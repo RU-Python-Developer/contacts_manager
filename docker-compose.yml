@@ -1,0 +1,36 @@
+version: '3.9'
+
+volumes:
+  Server:
+    external: true
+
+services:
+  db:
+    container_name: db
+    image: postgres
+    command: "-c logging_collector=on"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: Ngeom0booyae2hi7quuo8oonohxahVohzooja6
+      POSTGRES_DB: postgres_db
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "Server:/var/lib/postgresql/data/"
+    ports:
+      - "5432:5432"
+
+  backend:
+      
+      container_name: backend
+      build: ./backend
+           
+      command: bash -c "alembic revision --autogenerate && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+      ports:
+        - "8000:8000"
+      restart: always
+      depends_on:
+        - db
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - "./backend/:/backend/"
